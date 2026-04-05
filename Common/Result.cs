@@ -35,7 +35,7 @@ public class Result<T>
     {
         IsSuccess = false,
         ErrorCode = errorCode,
-        ErrorMessage = errorCode
+        ErrorMessage = errorMessage
     };
 }
 
