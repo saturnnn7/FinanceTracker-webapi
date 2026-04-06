@@ -2,6 +2,10 @@ using FinanceTracker.Data;
 using FinanceTracker.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using FinanceTracker.DTOs.Common;
+
 using FinanceTracker.Repositories;
 using FinanceTracker.Repositories.Interfaces;
 
@@ -25,7 +29,35 @@ builder.Services.AddScoped<IRecurringTransactionRepository, RecurringTransaction
 builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Intercept the automatic 400 response from [ApiController]
+        // and return it in our ApiResponse format
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var details = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value!.Errors
+                        .Select(e => e.ErrorMessage)
+                        .ToArray()
+                );
+
+            var response = ApiResponse<object>.Fail(
+                ErrorCodes.ValidationError,
+                "One or more validation errors occurred.",
+                details);
+
+            return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(response);
+        };
+    });
+
+// We automatically register all validators from the build
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
