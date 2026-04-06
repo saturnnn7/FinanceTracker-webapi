@@ -13,7 +13,7 @@ public class Result<T>
     public T? Value { get; private set; }
     public string? ErrorCode { get; private set; }
     public string? ErrorMessage { get; private set; }
-    public bool isFailure => !IsSuccess;
+    public bool IsFailure => !IsSuccess;
 
     // ---------------------------------
     // Constructor

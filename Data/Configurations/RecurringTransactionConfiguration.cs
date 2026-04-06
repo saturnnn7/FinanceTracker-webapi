@@ -38,6 +38,6 @@ public class RecurringTransactionConfiguration : IEntityTypeConfiguration<Recurr
             .HasForeignKey(r => r.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(r => new { r.IsActice, r.NextRunAt });
+        builder.HasIndex(r => new { r.IsActive, r.NextRunAt });
     }
 }

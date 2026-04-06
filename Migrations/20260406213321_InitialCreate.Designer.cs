@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260406211735_InitialCreate")]
+    [Migration("20260406213321_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,6 +28,7 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("Color")
                         .IsRequired()
+                        .HasMaxLength(7)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -35,20 +36,23 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("Currency")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("InitialBalance")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsArchived")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -76,7 +80,7 @@ namespace FinanceTracker.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("LimitAmount")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Month")
                         .HasColumnType("INTEGER");
@@ -94,7 +98,8 @@ namespace FinanceTracker.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "CategoryId", "Month", "Year")
+                        .IsUnique();
 
                     b.ToTable("Budgets");
                 });
@@ -107,6 +112,7 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("Color")
                         .IsRequired()
+                        .HasMaxLength(7)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -114,6 +120,7 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("Icon")
                         .IsRequired()
+                        .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsSystem")
@@ -121,6 +128,7 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -133,7 +141,109 @@ namespace FinanceTracker.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Categorys");
+                    b.ToTable("Categories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000001"),
+                            Color = "#FF6B6B",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "🍔",
+                            IsSystem = true,
+                            Name = "Food and Restaurants",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000002"),
+                            Color = "#4ECDC4",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "🚗",
+                            IsSystem = true,
+                            Name = "Transport",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000003"),
+                            Color = "#45B7D1",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "🏠",
+                            IsSystem = true,
+                            Name = "Housing",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000004"),
+                            Color = "#96CEB4",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "💊",
+                            IsSystem = true,
+                            Name = "Health",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000005"),
+                            Color = "#FFEAA7",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "🎮",
+                            IsSystem = true,
+                            Name = "Entertainment",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000006"),
+                            Color = "#DDA0DD",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "👕",
+                            IsSystem = true,
+                            Name = "Clothing",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000007"),
+                            Color = "#98D8C8",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "💰",
+                            IsSystem = true,
+                            Name = "Salary",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000008"),
+                            Color = "#F7DC6F",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "💻",
+                            IsSystem = true,
+                            Name = "Freelance",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000009"),
+                            Color = "#BB8FCE",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "📱",
+                            IsSystem = true,
+                            Name = "Subscriptions",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000010"),
+                            Color = "#6C757D",
+                            CreatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Icon = "📦",
+                            IsSystem = true,
+                            Name = "Other",
+                            UpdatedAt = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("FinanceTracker.Models.Goal", b =>
@@ -146,19 +256,21 @@ namespace FinanceTracker.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("TargetAmount")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("TargetDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -171,7 +283,7 @@ namespace FinanceTracker.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Goal");
+                    b.ToTable("Goals", (string)null);
                 });
 
             modelBuilder.Entity("FinanceTracker.Models.RecurringTransaction", b =>
@@ -184,7 +296,7 @@ namespace FinanceTracker.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("TEXT");
@@ -192,10 +304,11 @@ namespace FinanceTracker.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Interval")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Interval")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsActice")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("LastRunAt")
@@ -206,10 +319,12 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -224,6 +339,8 @@ namespace FinanceTracker.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("IsActive", "NextRunAt");
 
                     b.ToTable("RecurringTransactions");
                 });
@@ -238,7 +355,7 @@ namespace FinanceTracker.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("TEXT");
@@ -253,6 +370,7 @@ namespace FinanceTracker.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Note")
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("RecurringTransactionId")
@@ -261,8 +379,9 @@ namespace FinanceTracker.Migrations
                     b.Property<Guid?>("TransferPairId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -273,9 +392,13 @@ namespace FinanceTracker.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("Date");
+
                     b.HasIndex("GoalId");
 
                     b.HasIndex("RecurringTransactionId");
+
+                    b.HasIndex("AccountId", "Date");
 
                     b.ToTable("Transactions");
                 });
@@ -288,6 +411,7 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("BaseCurrency")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -295,6 +419,7 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
@@ -306,9 +431,16 @@ namespace FinanceTracker.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -347,7 +479,8 @@ namespace FinanceTracker.Migrations
                 {
                     b.HasOne("FinanceTracker.Models.User", "User")
                         .WithMany("Categories")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
@@ -368,13 +501,13 @@ namespace FinanceTracker.Migrations
                     b.HasOne("FinanceTracker.Models.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FinanceTracker.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FinanceTracker.Models.User", "User")
@@ -406,11 +539,13 @@ namespace FinanceTracker.Migrations
 
                     b.HasOne("FinanceTracker.Models.Goal", "Goal")
                         .WithMany("Transactions")
-                        .HasForeignKey("GoalId");
+                        .HasForeignKey("GoalId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("FinanceTracker.Models.RecurringTransaction", "RecurringTransaction")
                         .WithMany("Transactions")
-                        .HasForeignKey("RecurringTransactionId");
+                        .HasForeignKey("RecurringTransactionId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Account");
 

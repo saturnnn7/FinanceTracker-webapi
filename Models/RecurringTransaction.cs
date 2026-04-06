@@ -14,7 +14,7 @@ public class RecurringTransaction : IAuditableEntity
     public decimal              Amount      { get; set; }
     public TransactionType      Type        { get; set; }
     public RecurrenceInterval   Interval    { get; set; }
-    public bool                 IsActice    { get; set; } = true;
+    public bool                 IsActive    { get; set; } = true;
 
     /// <summary>The date of the next automatic transaction creation.</summary>
     public DateTime NextRunAt   { get; set; }

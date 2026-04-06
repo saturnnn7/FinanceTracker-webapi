@@ -21,9 +21,9 @@ public class AppDbContext : DbContext
     public DbSet<Models.User> Users { get; set; }
     public DbSet<Models.Account> Accounts { get; set; }
     public DbSet<Models.Transaction> Transactions { get; set; }
-    public DbSet<Models.Category> Categorys { get; set; }
+    public DbSet<Models.Category> Categories { get; set; }
     public DbSet<Models.Budget> Budgets { get; set; }
-    public DbSet<Models.Goal> Goal { get; set; }
+    public DbSet<Models.Goal> Goals { get; set; }
     public DbSet<Models.RecurringTransaction> RecurringTransactions { get; set; }
 
     // -------------------------------------------------------
@@ -42,7 +42,7 @@ public class AppDbContext : DbContext
         // Finds all classes that implement IEntityTypeConfiguration<T>
         // and applies them—no need to list each one manually.
         modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(AppContext).Assembly);
+            typeof(AppDbContext).Assembly);
     }
 
 
