@@ -2,6 +2,9 @@ using FinanceTracker.Data;
 using FinanceTracker.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;
 
+using FinanceTracker.Repositories;
+using FinanceTracker.Repositories.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Interceptor
@@ -12,6 +15,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IRecurringTransactionRepository, RecurringTransactionRepository>();
+builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 
 // Add services to the container.
 builder.Services.AddControllers();
