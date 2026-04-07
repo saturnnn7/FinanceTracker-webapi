@@ -1,9 +1,8 @@
+using System.Text;
+
 using FinanceTracker.Data;
 using FinanceTracker.Data.Interceptors;
-using Microsoft.EntityFrameworkCore;
 
-using FluentValidation;
-using FluentValidation.AspNetCore;
 using FinanceTracker.DTOs.Common;
 
 using FinanceTracker.Repositories;
@@ -12,16 +11,28 @@ using FinanceTracker.Repositories.Interfaces;
 using FinanceTracker.Services;
 using FinanceTracker.Services.Interfaces;
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Interceptor
+// -------------------------------------------------------
+// Interceptor — Singleton
 builder.Services.AddSingleton<AuditInterceptor>();
 
+// -------------------------------------------------------
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// -------------------------------------------------------
 // Repositories
 builder.Services.AddScoped<IUserRepository,                 UserRepository>();
 builder.Services.AddScoped<IAccountRepository,              AccountRepository>();
@@ -31,6 +42,7 @@ builder.Services.AddScoped<IBudgetRepository,               BudgetRepository>();
 builder.Services.AddScoped<IRecurringTransactionRepository, RecurringTransactionRepository>();
 builder.Services.AddScoped<IGoalRepository,                 GoalRepository>();
 
+// -------------------------------------------------------
 // Services
 builder.Services.AddScoped<IAuthService,                    AuthService>();
 builder.Services.AddScoped<IAccountService,                 AccountService>();
@@ -41,7 +53,32 @@ builder.Services.AddScoped<IGoalService,                    GoalService>();
 builder.Services.AddScoped<IRecurringTransactionService,    RecurringTransactionService>();
 builder.Services.AddScoped<IStatisticsService,              StatisticsService>();
 
-// Add services to the container.
+// -------------------------------------------------------
+// JWT
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key is not configured.");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer           = true,
+            ValidateAudience         = true,
+            ValidateLifetime         = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer              = builder.Configuration["Jwt:Issuer"],
+            ValidAudience            = builder.Configuration["Jwt:Issuer"],
+            IssuerSigningKey         = new SymmetricSecurityKey(
+                                           Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// -------------------------------------------------------
+// Controllers + FluentValidation + ApiResponse format
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
@@ -63,7 +100,7 @@ builder.Services.AddControllers()
                 "One or more validation errors occurred.",
                 details);
 
-            return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(response);
+            return new BadRequestObjectResult(response);
         };
     });
 
@@ -71,9 +108,46 @@ builder.Services.AddControllers()
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+// -------------------------------------------------------
+// Swagger + Bearer token
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title   = "Finance Tracker API",
+        Version = "v1",
+        Description = "Personal finance tracking REST API"
+    });
 
+    // Add an “Authorize” button to Swagger UI
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name        = "Authorization",
+        Type        = SecuritySchemeType.Http,
+        Scheme      = "Bearer",
+        BearerFormat = "JWT",
+        In          = ParameterLocation.Header,
+        Description = "Enter your JWT token. Example: Bearer eyJhbGci..."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id   = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// -------------------------------------------------------
 
 var app = builder.Build();
 
@@ -87,7 +161,10 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Finance Tracker API v1");
+    });
 }
 
 
