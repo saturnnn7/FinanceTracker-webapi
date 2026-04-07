@@ -9,6 +9,9 @@ using FinanceTracker.DTOs.Common;
 using FinanceTracker.Repositories;
 using FinanceTracker.Repositories.Interfaces;
 
+using FinanceTracker.Services;
+using FinanceTracker.Services.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Interceptor
@@ -20,13 +23,23 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Repositories
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IUserRepository,                 UserRepository>();
+builder.Services.AddScoped<IAccountRepository,              AccountRepository>();
+builder.Services.AddScoped<ICategoryRepository,             CategoryRepository>();
+builder.Services.AddScoped<ITransactionRepository,          TransactionRepository>();
+builder.Services.AddScoped<IBudgetRepository,               BudgetRepository>();
 builder.Services.AddScoped<IRecurringTransactionRepository, RecurringTransactionRepository>();
-builder.Services.AddScoped<IGoalRepository, GoalRepository>();
+builder.Services.AddScoped<IGoalRepository,                 GoalRepository>();
+
+// Services
+builder.Services.AddScoped<IAuthService,                    AuthService>();
+builder.Services.AddScoped<IAccountService,                 AccountService>();
+builder.Services.AddScoped<ICategoryService,                CategoryService>();
+builder.Services.AddScoped<ITransactionService,             TransactionService>();
+builder.Services.AddScoped<IBudgetService,                  BudgetService>();
+builder.Services.AddScoped<IGoalService,                    GoalService>();
+builder.Services.AddScoped<IRecurringTransactionService,    RecurringTransactionService>();
+builder.Services.AddScoped<IStatisticsService,              StatisticsService>();
 
 // Add services to the container.
 builder.Services.AddControllers()
