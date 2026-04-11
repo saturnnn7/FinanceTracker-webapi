@@ -24,7 +24,7 @@ public class BudgetsController : BaseController
         [FromQuery] int year,
         CancellationToken ct)
     {
-        // Если не передали — берём текущий месяц
+        // If it hasn't been submitted, use this month's figures
         var targetMonth = month == 0 ? DateTime.UtcNow.Month : month;
         var targetYear  = year  == 0 ? DateTime.UtcNow.Year  : year;
 

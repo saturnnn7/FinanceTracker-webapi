@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FinanceTracker.Controllers;
 
 [Route("api/auth")]
-[AllowAnonymous]  // весь контроллер без токена — регистрация и логин
+[AllowAnonymous]
 public class AuthController : BaseController
 {
     private readonly IAuthService _authService;

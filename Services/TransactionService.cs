@@ -197,7 +197,7 @@ public class TransactionService : ITransactionService
             CategoryId     = dto.CategoryId,
             Date           = dto.Date.ToUniversalTime(),
             Note           = dto.Note,
-            TransferPairId = transferId   // ← ссылка на первую транзакцию
+            TransferPairId = transferId   // ← Link to the first transaction
         };
 
         // Let's tie it back

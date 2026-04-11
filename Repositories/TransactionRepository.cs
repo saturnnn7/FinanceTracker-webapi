@@ -36,7 +36,7 @@ public class TransactionRepository : ITransactionRepository
             .Include(t => t.Account)
             .Where(t => t.Account.UserId == userId);
 
-        // Фильтры — применяем только если переданы
+        // Filters — use only if provided
         if (accountId.HasValue)
             query = query.Where(t => t.AccountId == accountId.Value);
 
@@ -93,14 +93,14 @@ public class TransactionRepository : ITransactionRepository
 
     public async Task<decimal> GetBalanceByAccountAsync(Guid accountId, CancellationToken ct = default)
     {
-        // Подтягиваем в память — SQLite не умеет SUM(decimal)
+        // Just a reminder: SQLite doesn't support SUM(decimal)
         var amounts = await _context.Transactions
             .Where(t => t.AccountId == accountId)
             .Select(t => new { t.Type, t.Amount })
             .ToListAsync(ct);
 
-        // Считаем баланс как SUM(Income) - SUM(Expense) прямо в БД
-        // Transfer не участвует — он уже разбит на Income + Expense
+        // Calculate the balance as SUM(Income) - SUM(Expense) directly in the database
+        // Transfers are not included—they are already broken down into Income and Expense
         var income  = amounts
             .Where(t => t.Type == TransactionType.Income)
             .Sum(t => t.Amount);

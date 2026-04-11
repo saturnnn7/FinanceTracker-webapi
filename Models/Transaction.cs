@@ -16,7 +16,7 @@ public class Transaction : IAuditableEntity
     public TransactionType Type { get; set; }
     public string? Note { get; set; }
 
-    /// <summary>Дата совершения транзакции (не дата создания записи).</summary>
+    /// <summary>Transaction date (not the date the record was created).</summary>
     public DateTime Date { get; set; }
 
     /// <summary>

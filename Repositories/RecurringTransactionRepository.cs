@@ -32,7 +32,7 @@ public class RecurringTransactionRepository : IRecurringTransactionRepository
             .ToListAsync(ct);
 
     /// <summary>
-    /// Используется Background Service — ищет все активные у которых пришло время.
+    /// A background service is used—it checks for all active processes whose time has come.
     /// </summary>
     public async Task<IEnumerable<RecurringTransaction>> GetDueAsync(
         DateTime now, CancellationToken ct = default)
