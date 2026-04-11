@@ -126,11 +126,14 @@ public class StatisticsService : IStatisticsService
             .ToListAsync(ct);
 
         // Opening balance — everything up to dateFrom
-        var initialBalance = account.InitialBalance + await _context.Transactions
+        var prevTransactions = await _context.Transactions
             .Where(t => t.AccountId == accountId && t.Date < dateFrom)
-            .SumAsync(t =>
-                t.Type == TransactionType.Income  ?  t.Amount :
-                t.Type == TransactionType.Expense ? -t.Amount : 0, ct);
+            .Select(t => new { t.Type, t.Amount })
+            .ToListAsync(ct);
+
+        var initialBalance = account.InitialBalance + prevTransactions.Sum(t =>
+            t.Type == TransactionType.Income  ?  t.Amount :
+            t.Type == TransactionType.Expense ? -t.Amount : 0m);
 
         // Building a history — cumulative total by day
         var history  = new List<BalanceHistoryDto>();

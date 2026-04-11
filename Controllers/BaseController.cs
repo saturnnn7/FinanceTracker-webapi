@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using FinanceTracker.Common;
 using FinanceTracker.DTOs.Common;
+using FinanceTracker.DTOs.Transaction;
 
 namespace FinanceTracker.Controllers;
 
@@ -89,6 +90,25 @@ public abstract class BaseController : ControllerBase
             _                           => StatusCode(500, 
                                             ApiResponse<object>.Fail(
                                                 ErrorCodes.InternalError, result.ErrorMessage ?? "Unexpected error."))
+        };
+    }
+
+    protected IActionResult FromResult(Result result)
+    {
+        if (result.IsSuccess)
+            return NoContent();
+    
+        return result.ErrorCode switch
+        {
+            ErrorCodes.NotFound         => NotFoundResponse(result.ErrorMessage!),
+            ErrorCodes.Conflict         => ConflictResponse(result.ErrorMessage!),
+            ErrorCodes.Unauthorized     => UnauthorizedResponse(result.ErrorMessage!),
+            ErrorCodes.Forbidden        => ForbiddenResponse(result.ErrorMessage!),
+            ErrorCodes.InvalidOperation => InvalidOperationResponse(result.ErrorMessage!),
+            _                           => StatusCode(500,
+                                             ApiResponse<object>.Fail(
+                                                 ErrorCodes.InternalError,
+                                                 result.ErrorMessage ?? "Unexpected error."))
         };
     }
 }

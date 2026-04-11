@@ -50,7 +50,7 @@ public class Result
     public bool     IsSuccess       { get; private set; }
     public string?  ErrorCode       { get; private set; }
     public string?  ErrorMessage    { get; private set; }
-    public bool     isFailure       => !IsSuccess;
+    public bool     IsFailure       => !IsSuccess;
 
     // ---------------------------------
     // Constructor

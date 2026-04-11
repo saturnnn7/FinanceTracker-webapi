@@ -93,15 +93,21 @@ public class TransactionRepository : ITransactionRepository
 
     public async Task<decimal> GetBalanceByAccountAsync(Guid accountId, CancellationToken ct = default)
     {
+        // Подтягиваем в память — SQLite не умеет SUM(decimal)
+        var amounts = await _context.Transactions
+            .Where(t => t.AccountId == accountId)
+            .Select(t => new { t.Type, t.Amount })
+            .ToListAsync(ct);
+
         // Считаем баланс как SUM(Income) - SUM(Expense) прямо в БД
         // Transfer не участвует — он уже разбит на Income + Expense
-        var income = await _context.Transactions
-            .Where(t => t.AccountId == accountId && t.Type == TransactionType.Income)
-            .SumAsync(t => t.Amount, ct);
+        var income  = amounts
+            .Where(t => t.Type == TransactionType.Income)
+            .Sum(t => t.Amount);
 
-        var expense = await _context.Transactions
-            .Where(t => t.AccountId == accountId && t.Type == TransactionType.Expense)
-            .SumAsync(t => t.Amount, ct);
+        var expense = amounts
+            .Where(t => t.Type == TransactionType.Expense)
+            .Sum(t => t.Amount);
 
         return income - expense;
     }
@@ -112,14 +118,19 @@ public class TransactionRepository : ITransactionRepository
         int month,
         int year,
         CancellationToken ct = default)
-        => await _context.Transactions
+    {
+        var amounts = await _context.Transactions
             .Where(t =>
                 t.Account.UserId == userId &&
                 t.CategoryId == categoryId &&
                 t.Type == TransactionType.Expense &&
                 t.Date.Month == month &&
                 t.Date.Year == year)
-            .SumAsync(t => t.Amount, ct);
+            .Select(t => t.Amount)
+            .ToListAsync(ct);
+        
+        return amounts.Sum();
+    }
 
     public async Task AddAsync(Transaction transaction, CancellationToken ct = default)
         => await _context.Transactions.AddAsync(transaction, ct);
