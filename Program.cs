@@ -4,6 +4,7 @@ using FinanceTracker.Data;
 using FinanceTracker.Data.Interceptors;
 
 using FinanceTracker.DTOs.Common;
+using FinanceTracker.Common;
 
 using FinanceTracker.Repositories;
 using FinanceTracker.Repositories.Interfaces;
@@ -150,6 +151,9 @@ builder.Services.AddSwaggerGen(options =>
 // -------------------------------------------------------
 
 var app = builder.Build();
+
+//
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 // Migrationd for dev
 using (var scope = app.Services.CreateScope())

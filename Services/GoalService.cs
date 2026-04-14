@@ -1,27 +1,28 @@
 using FinanceTracker.Common;
+using FinanceTracker.Data;
 using FinanceTracker.DTOs.Goal;
-using FinanceTracker.DTOs.Common;
 using FinanceTracker.Models;
 using FinanceTracker.Models.Enums;
 using FinanceTracker.Repositories.Interfaces;
 using FinanceTracker.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceTracker.Services;
 
 public class GoalService : IGoalService
 {
     private readonly IGoalRepository        _goalRepository;
-    private readonly ITransactionRepository _transactionRepository;
+    private readonly AppDbContext           _context;
     private readonly ILogger<GoalService>   _logger;
 
     public GoalService(
         IGoalRepository goalRepository,
-        ITransactionRepository transactionRepository,
+        AppDbContext context,
         ILogger<GoalService> logger)
     {
-        _goalRepository        = goalRepository;
-        _transactionRepository = transactionRepository;
-        _logger                = logger;
+        _goalRepository = goalRepository;
+        _context        = context;
+        _logger         = logger;
     }
 
     public async Task<Result<IEnumerable<GoalResponseDto>>> GetAllAsync(
@@ -66,6 +67,9 @@ public class GoalService : IGoalService
         await _goalRepository.AddAsync(goal, ct);
         await _goalRepository.SaveChangesAsync(ct);
 
+        _logger.LogInformation(
+            "Goal created: {Title} for user {UserId}", goal.Title, userId);
+
         return Result<GoalResponseDto>.Ok(MapToDto(goal, 0));
     }
 
@@ -82,8 +86,9 @@ public class GoalService : IGoalService
         goal.TargetAmount = dto.TargetAmount;
         goal.TargetDate   = dto.TargetDate.ToUniversalTime();
 
-        // Automatically mark as completed if the total is greater than or equal to the target
         var saved = await GetSavedAmountAsync(goal.Id, ct);
+
+        // Automatically mark as completed if the total is greater than or equal to the target
         if (saved >= goal.TargetAmount)
             goal.IsCompleted = true;
 
@@ -109,11 +114,19 @@ public class GoalService : IGoalService
     // -------------------------------------------------------
 
     /// <summary>
-    /// The sum of all Income transactions associated with the goal.
+    /// Calculate the total amount accumulated—the sum of all Income transactions
+    /// where GoalId == goalId. SQLite does not support SumAsync(decimal)
+    /// so we load the data into memory using ToListAsync.
     /// </summary>
     private async Task<decimal> GetSavedAmountAsync(Guid goalId, CancellationToken ct)
-        => await _transactionRepository
-            .GetBalanceByAccountAsync(goalId, ct);
+    {
+        var amounts = await _context.Transactions
+            .Where(t => t.GoalId == goalId && t.Type == TransactionType.Income)
+            .Select(t => t.Amount)
+            .ToListAsync(ct);
+
+        return amounts.Sum();
+    }
 
     // -------------------------------------------------------
 
