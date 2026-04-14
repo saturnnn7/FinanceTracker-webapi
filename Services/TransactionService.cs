@@ -163,6 +163,36 @@ public class TransactionService : ITransactionService
         return Result.Ok();
     }
 
+    public async Task<Result<IEnumerable<TransactionExportDto>>> GetForExportAsync(
+    Guid userId,
+    DateTime dateFrom,
+    DateTime dateTo,
+    CancellationToken ct = default)
+    {
+        var transactions = await _transactionRepository.GetAllAsync(
+            userId,
+            accountId:  null,
+            categoryId: null,
+            dateFrom:   dateFrom,
+            dateTo:     dateTo,
+            type:       null,
+            page:       1,
+            pageSize:   10_000,  // maximum for export
+            ct:         ct);
+
+        var dtos = transactions.Select(t => new TransactionExportDto
+        {
+            Date         = t.Date.ToString("yyyy-MM-dd HH:mm"),
+            Type         = t.Type.ToString(),
+            Amount       = t.Amount,
+            AccountName  = t.Account.Name,
+            CategoryName = t.Category.Name,
+            Note         = t.Note ?? string.Empty
+        });
+
+        return Result<IEnumerable<TransactionExportDto>>.Ok(dtos);
+    }
+
     // -------------------------------------------------------
     // Transfer: Creating Two Linked Transactions
 

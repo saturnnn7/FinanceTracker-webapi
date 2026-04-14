@@ -3,6 +3,9 @@ using FinanceTracker.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using CsvHelper;
+using System.Globalization;
+
 namespace FinanceTracker.Controllers;
 
 [Route("api/transactions")]
@@ -91,5 +94,42 @@ public class TransactionsController : BaseController
             return FromResult(result);
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Export transactions to CSV file for a date range.
+    /// </summary>
+    [HttpGet("export")]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ExportCsv(
+        [FromQuery] DateTime dateFrom,
+        [FromQuery] DateTime dateTo,
+        CancellationToken ct)
+    {
+        if (dateFrom > dateTo)
+            return BadRequest(ApiResponse<object>.Fail(
+                ErrorCodes.ValidationError,
+                "dateFrom must be earlier than dateTo."));
+
+        var result = await _transactionService.GetForExportAsync(
+            GetUserId(), dateFrom, dateTo, ct);
+
+        if (result.IsFailure)
+            return FromResult(result);
+
+        // Writing CSV to memory—not to disk
+        var stream = new MemoryStream();
+        var writer = new StreamWriter(stream, leaveOpen: true);
+        var csv    = new CsvWriter(writer, CultureInfo.InvariantCulture);
+
+        await csv.WriteRecordsAsync(result.Value!, ct);
+        await writer.FlushAsync(ct);
+        stream.Position = 0;
+
+        var fileName = $"transactions_{dateFrom:yyyyMMdd}_{dateTo:yyyyMMdd}.csv";
+
+        // When you upload a file, the browser will prompt you to download it
+        return File(stream, "text/csv", fileName);
     }
 }

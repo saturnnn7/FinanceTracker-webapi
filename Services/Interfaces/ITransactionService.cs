@@ -12,4 +12,9 @@ public interface ITransactionService
     Task<Result<TransactionResponseDto>> CreateAsync(Guid userId, CreateTransactionDto dto, CancellationToken ct = default);
     Task<Result<TransactionResponseDto>> UpdateAsync(Guid id, Guid userId, UpdateTransactionDto dto, CancellationToken ct = default);
     Task<Result> DeleteAsync(Guid id, Guid userId, CancellationToken ct = default);
+    Task<Result<IEnumerable<TransactionExportDto>>> GetForExportAsync(
+        Guid userId,
+        DateTime dateFrom,
+        DateTime dateTo,
+        CancellationToken ct = default);
 }
