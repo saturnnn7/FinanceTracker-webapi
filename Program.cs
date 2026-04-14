@@ -5,7 +5,7 @@ using FinanceTracker.Data.Interceptors;
 
 using FinanceTracker.DTOs.Common;
 using FinanceTracker.Common;
-
+using FinanceTracker.BackgroundServices;
 using FinanceTracker.Repositories;
 using FinanceTracker.Repositories.Interfaces;
 
@@ -22,6 +22,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// -------------------------------------------------------
+// Recurring Transaction
+builder.Services.AddHostedService<RecurringTransactionProcessor>();
 
 // -------------------------------------------------------
 // Interceptor — Singleton
@@ -148,11 +152,12 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+// -------------------------------------------------------
+var app = builder.Build();
 // -------------------------------------------------------
 
-var app = builder.Build();
-
-//
+// Exception Handler
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 // Migrationd for dev
