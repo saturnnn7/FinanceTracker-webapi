@@ -21,7 +21,7 @@ public class AccountsController : BaseController
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<AccountResponseDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
-        var result = await _accountService.GetAllAsync(GetUserId(), ct);
+        var result = await _accountService.GetAllAsync(GetUserId(), GetBaseCurrency(), ct);
         return FromResult(result);
     }
 
@@ -31,7 +31,7 @@ public class AccountsController : BaseController
     [ProducesResponseType(typeof(ApiResponse<object>),             StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken ct)
     {
-        var result = await _accountService.GetByIdAsync(id, GetUserId(), ct);
+        var result = await _accountService.GetByIdAsync(id, GetUserId(), GetBaseCurrency(), ct);
         return FromResult(result);
     }
 

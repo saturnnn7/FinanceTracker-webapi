@@ -12,20 +12,23 @@ public class AccountService : IAccountService
 {
     private readonly IAccountRepository     _accountRepository;
     private readonly ITransactionRepository _transactionRepository;
+    private readonly ICurrencyService        _currencyService;
     private readonly ILogger<AccountService> _logger;
 
     public AccountService(
         IAccountRepository accountRepository,
         ITransactionRepository transactionRepository,
+        ICurrencyService currencyService,
         ILogger<AccountService> logger)
     {
         _accountRepository     = accountRepository;
         _transactionRepository = transactionRepository;
+        _currencyService = currencyService;
         _logger                = logger;
     }
 
     public async Task<Result<IEnumerable<AccountResponseDto>>> GetAllAsync(
-        Guid userId, CancellationToken ct = default)
+        Guid userId, string baseCurrency, CancellationToken ct = default)
     {
         var accounts = await _accountRepository.GetAllByUserAsync(userId, ct);
 
@@ -35,15 +38,20 @@ public class AccountService : IAccountService
         {
             var balance = await _transactionRepository
                 .GetBalanceByAccountAsync(account.Id, ct);
+                
+            var currentBalance = account.InitialBalance + balance;
+            // Converting to Base Currensy
+            var converted = await _currencyService.ConvertAsync(
+                currentBalance, account.Currency, baseCurrency, ct);
 
-            dtos.Add(MapToDto(account, account.InitialBalance + balance));
+            dtos.Add(MapToDto(account, currentBalance, converted, baseCurrency));
         }
 
         return Result<IEnumerable<AccountResponseDto>>.Ok(dtos);
     }
 
     public async Task<Result<AccountResponseDto>> GetByIdAsync(
-        Guid id, Guid userId, CancellationToken ct = default)
+        Guid id, Guid userId, string baseCurrency, CancellationToken ct = default)
     {
         var account = await _accountRepository.GetByIdAsync(id, userId, ct);
         if (account is null)
@@ -53,8 +61,13 @@ public class AccountService : IAccountService
         var balance = await _transactionRepository
             .GetBalanceByAccountAsync(account.Id, ct);
 
+        var currentBalance = account.InitialBalance + balance;
+            // Converting to Base Currensy
+        var converted = await _currencyService.ConvertAsync(
+            currentBalance, account.Currency, baseCurrency, ct);
+
         return Result<AccountResponseDto>.Ok(
-            MapToDto(account, account.InitialBalance + balance));
+            MapToDto(account, currentBalance, converted, baseCurrency));
     }
 
     public async Task<Result<AccountResponseDto>> CreateAsync(
@@ -81,7 +94,7 @@ public class AccountService : IAccountService
 
         // New account — balance equals opening balance
         return Result<AccountResponseDto>.Ok(
-            MapToDto(account, account.InitialBalance));
+            MapToDto(account, account.InitialBalance, account.InitialBalance, account.Currency));
     }
 
     public async Task<Result<AccountResponseDto>> UpdateAsync(
@@ -101,9 +114,10 @@ public class AccountService : IAccountService
 
         var balance = await _transactionRepository
             .GetBalanceByAccountAsync(account.Id, ct);
+        var currentBalance = account.InitialBalance + balance;
 
         return Result<AccountResponseDto>.Ok(
-            MapToDto(account, account.InitialBalance + balance));
+            MapToDto(account, currentBalance, currentBalance, account.Currency));
     }
 
     public async Task<Result> DeleteAsync(
@@ -124,16 +138,18 @@ public class AccountService : IAccountService
 
     // -------------------------------------------------------
 
-    private static AccountResponseDto MapToDto(Account account, decimal currentBalance) => new()
+    private static AccountResponseDto MapToDto(Account account, decimal currentBalance, decimal currentBalanceConverted, string baseCurrency) => new()
     {
-        Id             = account.Id,
-        Name           = account.Name,
-        Type           = account.Type.ToString(),
-        InitialBalance = account.InitialBalance,
-        CurrentBalance = currentBalance,
-        Currency       = account.Currency,
-        Color          = account.Color,
-        IsArchived     = account.IsArchived,
-        CreatedAt      = account.CreatedAt
+        Id                      = account.Id,
+        Name                    = account.Name,
+        Type                    = account.Type.ToString(),
+        InitialBalance          = account.InitialBalance,
+        CurrentBalance          = currentBalance,
+        CurrentBalanceConverted = currentBalanceConverted,
+        Currency                = account.Currency,
+        BaseCurrency            = baseCurrency,
+        Color                   = account.Color,
+        IsArchived              = account.IsArchived,
+        CreatedAt               = account.CreatedAt
     };
 }

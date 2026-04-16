@@ -58,6 +58,15 @@ builder.Services.AddScoped<IGoalService,                    GoalService>();
 builder.Services.AddScoped<IRecurringTransactionService,    RecurringTransactionService>();
 builder.Services.AddScoped<IStatisticsService,              StatisticsService>();
 
+// IMemoryCache for caching exchange rates
+builder.Services.AddMemoryCache();
+
+// HttpClient for making requests to an external currency exchange rate API
+builder.Services.AddHttpClient<ICurrencyService, CurrencyService>();
+
+// Register CurrencyService
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+
 // -------------------------------------------------------
 // JWT
 var jwtKey = builder.Configuration["Jwt:Key"]

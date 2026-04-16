@@ -11,6 +11,13 @@ namespace FinanceTracker.Controllers;
 public abstract class BaseController : ControllerBase
 {
     /// <summary>
+    /// Retrieves the user's BaseCurrency from the JWT claims.
+    /// The claim is added during login in the AuthService.
+    /// </summary>
+    protected string GetBaseCurrency() =>
+        User.FindFirstValue("currency") ?? "PLN";
+
+    /// <summary>
     /// UserId from JWT token
     /// </summary>
     protected Guid GetUserId()
