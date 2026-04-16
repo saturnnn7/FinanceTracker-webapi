@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260406213321_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260416180303_AddNotifications")]
+    partial class AddNotifications
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -286,6 +286,46 @@ namespace FinanceTracker.Migrations
                     b.ToTable("Goals", (string)null);
                 });
 
+            modelBuilder.Entity("FinanceTracker.Models.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "IsRead");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
             modelBuilder.Entity("FinanceTracker.Models.RecurringTransaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -489,6 +529,17 @@ namespace FinanceTracker.Migrations
                 {
                     b.HasOne("FinanceTracker.Models.User", "User")
                         .WithMany("Goals")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FinanceTracker.Models.Notification", b =>
+                {
+                    b.HasOne("FinanceTracker.Models.User", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

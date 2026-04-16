@@ -24,8 +24,9 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // -------------------------------------------------------
-// Recurring Transaction
+// Background Service
 builder.Services.AddHostedService<RecurringTransactionProcessor>();
+builder.Services.AddHostedService<NotificationProcessor>();
 
 // -------------------------------------------------------
 // Interceptor — Singleton
@@ -46,6 +47,7 @@ builder.Services.AddScoped<ITransactionRepository,          TransactionRepositor
 builder.Services.AddScoped<IBudgetRepository,               BudgetRepository>();
 builder.Services.AddScoped<IRecurringTransactionRepository, RecurringTransactionRepository>();
 builder.Services.AddScoped<IGoalRepository,                 GoalRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // -------------------------------------------------------
 // Services
@@ -57,6 +59,7 @@ builder.Services.AddScoped<IBudgetService,                  BudgetService>();
 builder.Services.AddScoped<IGoalService,                    GoalService>();
 builder.Services.AddScoped<IRecurringTransactionService,    RecurringTransactionService>();
 builder.Services.AddScoped<IStatisticsService,              StatisticsService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // IMemoryCache for caching exchange rates
 builder.Services.AddMemoryCache();

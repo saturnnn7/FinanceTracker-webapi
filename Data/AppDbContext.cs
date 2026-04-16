@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<Models.Budget> Budgets { get; set; }
     public DbSet<Models.Goal> Goals { get; set; }
     public DbSet<Models.RecurringTransaction> RecurringTransactions { get; set; }
+    public DbSet<Models.Notification> Notifications { get; set; }
 
     // -------------------------------------------------------
 
@@ -38,16 +39,13 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Automatically applies all configurations from the current build.
-        // Finds all classes that implement IEntityTypeConfiguration<T>
-        // and applies them—no need to list each one manually.
-        modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(AppDbContext).Assembly);
+        modelBuilder.ApplyConfiguration(new Configurations.UserConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.AccountConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.CategoryConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.TransactionConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.BudgetConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.RecurringTransactionConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.GoalConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.NotificationConfiguration());
     }
-
-
-
-
-
-
 }
