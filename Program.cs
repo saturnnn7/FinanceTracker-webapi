@@ -34,11 +34,14 @@ builder.Services.AddSingleton<AuditInterceptor>();
 
 // -------------------------------------------------------
 // Database
-// Program.cs — замени блок с connectionString
 var connectionString = 
-    Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ??
     Environment.GetEnvironmentVariable("DATABASE_URL") ??
+    Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL") ??
+    Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ??
     builder.Configuration.GetConnectionString("DefaultConnection")!;
+
+Console.WriteLine($"=== DB TYPE: {(connectionString.StartsWith("postgres") ? "POSTGRESQL" : "SQLITE")} ===");
+Console.WriteLine($"=== CS PREFIX: {connectionString[..Math.Min(20, connectionString.Length)]} ===");
 
 Console.WriteLine($"=== ENV DefaultConnection: {Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ?? "NULL"} ===");
 Console.WriteLine($"=== ENV DATABASE_URL: {(Environment.GetEnvironmentVariable("DATABASE_URL") ?? "NULL")[..Math.Min(20, (Environment.GetEnvironmentVariable("DATABASE_URL") ?? "NULL").Length)]} ===");
