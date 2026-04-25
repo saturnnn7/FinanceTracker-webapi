@@ -82,6 +82,8 @@ builder.Services.AddHttpClient<ICurrencyService, CurrencyService>();
 // JWT
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? builder.Configuration["Jwt__Key"]
+    ?? Environment.GetEnvironmentVariable("Jwt__Key")
+    ?? Environment.GetEnvironmentVariable("JWT__KEY")
     ?? throw new InvalidOperationException("Jwt:Key is not configured.");
 
 builder.Services
