@@ -34,9 +34,20 @@ builder.Services.AddSingleton<AuditInterceptor>();
 
 // -------------------------------------------------------
 // Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+
+if (connectionString.Contains("Data Source"))
+{
+    // SQLite for local
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite(connectionString));
+}
+else
+{
+    // PostgreSQL for Railway
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
 
 // -------------------------------------------------------
 // Repositories
@@ -66,9 +77,6 @@ builder.Services.AddMemoryCache();
 
 // HttpClient for making requests to an external currency exchange rate API
 builder.Services.AddHttpClient<ICurrencyService, CurrencyService>();
-
-// Register CurrencyService
-builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 
 // -------------------------------------------------------
 // JWT
@@ -164,6 +172,9 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Railway Port
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // -------------------------------------------------------
 var app = builder.Build();

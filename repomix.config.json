@@ -1,0 +1,14 @@
+{
+  "ignore": {
+    "customPatterns": [
+      "Migrations/**",
+      "bin/**",
+      "obj/**",
+      ".gitignore",
+      "README.md",
+      "*.http",
+      "*.sln",
+      "Properties/**"
+    ]
+  }
+}

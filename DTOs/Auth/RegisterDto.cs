@@ -9,5 +9,5 @@ public class RegisterDto
     /// <summary>
     /// ISO 4217: PLN, USD, EUR.
     /// </summary>
-    public string BaseCurrency { get; set; } = "PNL";
+    public string BaseCurrency { get; set; } = "PLN";
 }
