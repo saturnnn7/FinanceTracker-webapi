@@ -35,16 +35,19 @@ builder.Services.AddSingleton<AuditInterceptor>();
 // -------------------------------------------------------
 // Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+Console.WriteLine($"=== CONNECTION STRING: {connectionString[..Math.Min(50, connectionString.Length)]}... ===");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (connectionString.StartsWith("postgresql://") ||
         connectionString.StartsWith("postgres://"))
     {
+        Console.WriteLine("=== USING POSTGRESQL ===");
         options.UseNpgsql(connectionString);
     }
     else
     {
+        Console.WriteLine("=== USING SQLITE ===");
         options.UseSqlite(connectionString);
     }
 });
