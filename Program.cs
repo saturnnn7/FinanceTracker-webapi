@@ -34,8 +34,15 @@ builder.Services.AddSingleton<AuditInterceptor>();
 
 // -------------------------------------------------------
 // Database
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-Console.WriteLine($"=== CONNECTION STRING: {connectionString[..Math.Min(50, connectionString.Length)]}... ===");
+// Program.cs — замени блок с connectionString
+var connectionString = 
+    Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ??
+    Environment.GetEnvironmentVariable("DATABASE_URL") ??
+    builder.Configuration.GetConnectionString("DefaultConnection")!;
+
+Console.WriteLine($"=== ENV DefaultConnection: {Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ?? "NULL"} ===");
+Console.WriteLine($"=== ENV DATABASE_URL: {(Environment.GetEnvironmentVariable("DATABASE_URL") ?? "NULL")[..Math.Min(20, (Environment.GetEnvironmentVariable("DATABASE_URL") ?? "NULL").Length)]} ===");
+Console.WriteLine($"=== FINAL CS starts with: {connectionString[..Math.Min(30, connectionString.Length)]} ===");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
