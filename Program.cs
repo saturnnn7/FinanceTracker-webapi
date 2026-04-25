@@ -36,18 +36,18 @@ builder.Services.AddSingleton<AuditInterceptor>();
 // Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
-if (connectionString.Contains("Data Source"))
+builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    // SQLite for local
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite(connectionString));
-}
-else
-{
-    // PostgreSQL for Railway
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(connectionString));
-}
+    if (connectionString.StartsWith("postgresql://") ||
+        connectionString.StartsWith("postgres://"))
+    {
+        options.UseNpgsql(connectionString);
+    }
+    else
+    {
+        options.UseSqlite(connectionString);
+    }
+});
 
 // -------------------------------------------------------
 // Repositories
